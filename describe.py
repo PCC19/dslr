@@ -2,7 +2,6 @@ import pandas as pd
 import math
 import sys
 
-
 # All functions receive a dataframe column and return a number
 def calc_count(c):
     n = 0
@@ -58,6 +57,16 @@ def calc_percentile(c, p):
     #print ("n: ", n, " rank:", rank, "ant:", ant, " pos: ", pos, " frac:", frac, "cc_ant: ", cc[ant], "cc_pos", cc[pos], " p:", percentile)
     return percentile
     
+# Bonus function for categorical data. Returns a number and a dictionary
+def calc_frequency_count(c):
+    dic= {}
+    for row in c:
+        if row in dic:
+            dic[row] += 1
+        else:
+            dic[row] = 1
+    return len(dic), dic
+
 
 # =====================================================
 # MAIN
@@ -70,8 +79,8 @@ if len(sys.argv) > 1:
         print('File was not found or it is corrupted')
         exit(1)
     
-    df.drop(columns = ['Index'], inplace = True)
-    print("========= PYTHON DESCRIPTION: ================")
+    #df.drop(columns = ['Index'], inplace = True)
+    print("========= MY DESCRIPTION: ================")
     print(df.describe())
 
     # =====================================================
@@ -105,9 +114,20 @@ if len(sys.argv) > 1:
     # =====================================================
     # Generate dataframe with non-numeric columns
     # =====================================================
-    non_ndf = df.select_dtypes(exclude='number')
-    #print("\nNon-Numeric Columns DataFrame:")
-    #print(non_ndf)
+    print("============ BONUS: CATEGORICAL STATS ===================")
+    cdf = df.select_dtypes(exclude='number')
+    print("Categorial Columns:")
+    print(cdf.columns.to_list())
+    print("="*80)
+    dict= {}
+    for col in cdf[['Hogwarts House', 'Best Hand']]:
+        n, freq = calc_frequency_count(cdf[col])
+        freqdf = pd.DataFrame([freq])
+        print("Column: ", col)
+        print("n distinct: ", n)
+        print("Values Frequency:")
+        print(freqdf.transpose().to_string(header = False))
+        print("="*80)
 
 else:
     print('Usage: describe.py [file]')
