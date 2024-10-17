@@ -1,4 +1,3 @@
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -13,7 +12,7 @@ if len(sys.argv) > 1:
         exit(1)
     
     #df.drop(columns = ['Index'], inplace = True)
-    print("========= HISTOGRAM  ================")
+    print("========= SCATTER PLOT  ================")
     print(df.describe())
 
     # =====================================================
