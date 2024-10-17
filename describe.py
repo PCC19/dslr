@@ -1,4 +1,7 @@
 import pandas as pd
+import math
+import sys
+
 
 # All functions receive a dataframe column and return a number
 def calc_count(c):
@@ -16,44 +19,95 @@ def calc_mean(c):
             total += row
     return total / n
     
+def calc_std(c):
+    n = calc_count(c)
+    m = calc_mean(c)
+    total = 0;
+    for row in c:
+        if not pd.isna(row):
+            total += (row - m)**2
+    return math.sqrt(total/(n-1))
 
-# Read csv file in dataframe
-df = pd.read_csv('./datasets/dataset_train.csv')
-print("Original DataFrame:")
-print(df)
-print(df.describe())
-print(df.info())
-df.drop(columns = ['Index'], inplace = True)
+def calc_min(c):
+    min = float('inf')
+    for row in c:
+        if not pd.isna(row):
+            if row < min:
+                min = row
+    return min
 
-# Generate dataframe with numeric columns
-numeric_df = df.select_dtypes(include='number')
-print("\nNumeric Columns DataFrame:")
-print(numeric_df)
+def calc_max(c):
+    max = float('-inf')
+    for row in c:
+        if not pd.isna(row):
+            if row > max:
+                max = row
+    return max
 
-res = pd.DataFrame()
-dict= {}
-for col in numeric_df.columns:
-    x = calc_count(numeric_df[col])
-    dict.update({'count' : x})
-    x = calc_mean(numeric_df[col])
-    dict.update({'mean' : x})
-    dict.update({'min' : 1})
-    temp = pd.DataFrame(dict, index = [col])
-    print(dict)
-    print(temp)
-    res = pd.concat([res,temp])
-    print(res)
-#    pd.concat([res, pd.DataFrame(dict, index = col#)])
-#    res.rename(index={res.index[-1]: col}, inplace=True)
+def calc_percentile(c, p):
+    cc = sorted(c.dropna())
+    n = calc_count(cc)
+    rank = p / 100 * (n - 1)
+    ant = int(rank)
+    frac = rank - ant
+    if (frac == 0):
+        pos = ant
+    else:
+        pos = ant + 1
+    percentile = cc[ant] + frac * (cc[pos] - cc[ant])
+    #print ("n: ", n, " rank:", rank, "ant:", ant, " pos: ", pos, " frac:", frac, "cc_ant: ", cc[ant], "cc_pos", cc[pos], " p:", percentile)
+    return percentile
+    
 
-#res = pd.DataFrame(dict.items())
-#res = pd.DataFrame([dict])
-print(res.transpose())
+# =====================================================
+# MAIN
+# =====================================================
+if len(sys.argv) > 1:
+    try:
+        # Read csv file in dataframe
+        df = pd.read_csv(sys.argv[1])
+    except:
+        print('File was not found or it is corrupted')
+        exit(1)
+    
+    df.drop(columns = ['Index'], inplace = True)
+    print("========= PYTHON DESCRIPTION: ================")
+    print(df.describe())
 
-# Generate dataframe with non-numeric columns
-non_numeric_df = df.select_dtypes(exclude='number')
-#print("\nNon-Numeric Columns DataFrame:")
-#print(non_numeric_df)
+    # =====================================================
+    # Generate dataframe with numeric columns
+    # =====================================================
+    ndf = df.select_dtypes(include='number')
+    res = pd.DataFrame()
+    dict= {}
+    for col in ndf.columns:
+        x = calc_count(ndf[col])
+        dict.update({'count' : x})
+        x = calc_mean(ndf[col])
+        dict.update({'mean' : x})
+        x = calc_std(ndf[col])
+        dict.update({'std' : x})
+        x = calc_min(ndf[col])
+        dict.update({'min' : x})
+        x = calc_percentile(ndf[col], 25)
+        dict.update({'25%' : x})
+        x = calc_percentile(ndf[col], 50)
+        dict.update({'50%' : x})
+        x = calc_percentile(ndf[col], 75)
+        dict.update({'75%' : x})
+        x = calc_max(ndf[col])
+        dict.update({'max' : x})
+        temp = pd.DataFrame(dict, index = [col])
+        res = pd.concat([res,temp])
+    print("========= PYTHON DESCRIPTION: ================")
+    print(res.transpose())
 
+    # =====================================================
+    # Generate dataframe with non-numeric columns
+    # =====================================================
+    non_ndf = df.select_dtypes(exclude='number')
+    #print("\nNon-Numeric Columns DataFrame:")
+    #print(non_ndf)
 
-#
+else:
+    print('Usage: describe.py [file]')
