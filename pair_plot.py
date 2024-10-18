@@ -20,6 +20,7 @@ if len(sys.argv) > 1:
     # =====================================================
     gfg = sns.pairplot(df, hue = 'Hogwarts House', diag_kind="kde")
     plt.savefig('pair_plot.png', bbox_inches='tight')
-
     plt.tight_layout()
     plt.show()
+else:
+    print('Usage: pair_plot.py [file]')

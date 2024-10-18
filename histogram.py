@@ -36,5 +36,8 @@ if len(sys.argv) > 1:
         plt.setp(gfg.get_legend().get_title(), fontsize='6')
         gfg.set_ylabel(ylabel = '', fontsize = 8)
         gfg.set_xlabel(xlabel = '', fontsize = 8)
+    plt.savefig('histogram.png', bbox_inches='tight')
     plt.tight_layout()
     plt.show()
+else:
+    print('Usage: histogram.py [file]')

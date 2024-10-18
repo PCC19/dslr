@@ -36,5 +36,8 @@ if len(sys.argv) > 1:
         plt.setp(gfg.get_legend().get_title(), fontsize='6')
         gfg.set_ylabel(ylabel = '', fontsize = 6)
         gfg.set_xlabel(xlabel = '', fontsize = 6)
+    plt.savefig('pair_plot.png', bbox_inches='tight')
     plt.tight_layout()
     plt.show()
+else:
+    print('Usage: scatter_plot.py [file]')

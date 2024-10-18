@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import sys
-
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 def one_hot_encoding(c):
     target_col = c.values # Convert to nympy array
@@ -35,29 +35,29 @@ def compute_cost(x, y, theta):
 def gradient_descent(x, y, theta, alpha, num_iterations):
     m = y.size
     cost_history = []
-
     for _ in range(num_iterations):
         h = sigmoid(x @ theta)
-        gradient = (1/m) * (x.T @ (h - y))
+        gradient = (1/m) * (x.T @ (h - y)) # Derivative of the cost function
         theta -= alpha * gradient
         cost_history.append(compute_cost(x, y, theta))
-    
-
     return theta, cost_history
 
 def train_ova(x, y, alpha=0.01, num_iterations=2000, p = False):
     m, n = x.shape
     all_theta = np.zeros((y.shape[1], n))  # No bias term included
-
     for i in range(y.shape[1]):
         initial_theta = np.zeros(n)  # Initialize theta for each class without bias 
         all_theta[i], cost = gradient_descent(x, y[:, i], initial_theta, alpha, num_iterations)
-        if p:
-            plt.plot(cost)
-    if p:
-        plt.show()
-
+        print("cost:", cost[-1])
+        plt.plot(cost)
+        plt.grid()
+    plt.draw()
     return all_theta
+
+def predict(x, all_theta):
+    probabilities = sigmoid(x @ all_theta.T)  
+    return np.argmax(probabilities, axis=1) 
+
 # =====================================================
 # MAIN
 # =====================================================
@@ -76,78 +76,55 @@ if len(sys.argv) > 1:
     print(df.describe())
     print(df)
 
+    classes = np.unique(df['Hogwarts House'])
+    print('classes:')
+    print(classes)
     # Pegar coluna classes
     y = one_hot_encoding(df['Hogwarts House'])
     print("y:")
-    print(y)
+    print(pd.DataFrame(y))
 
     # Montar x
-    x = normalize_df(df.select_dtypes(include='number').values)
-    print('x_norm:')
-    print(x)
-    print(x.shape)
-    theta = train_ova(x, y, alpha=0.01, num_iterations=5000, p = False)
-    print('theta')
-    print(theta)
-    np.savetxt('theta.csv', theta)
-    exit(1)
-#Para cada classe
-#    Montar y
-#    Fitar modelo
-#    Salvar modelo numa coluna de matriz
-#Plotar modelos (thetas)
-#Salvar modelo
-
-#uncao previsao
- #   Recebe 4 colunas de pesos
- #   Aplicar regra
- #   Pega melhor
- #   Plota 4 previsoes
-    # =====================================================
-    # Generate dataframe with numeric columns
-    # =====================================================
     ndf = df.select_dtypes(include='number')
-    res = pd.DataFrame()
-    dict= {}
-    for col in ndf.columns:
-        x = calc_count(ndf[col])
-        dict.update({'count' : x})
-       # x = calc_mean(ndf[col])
-        dict.update({'mean' : x})
-        x = calc_std(ndf[col])
-        dict.update({'std' : x})
-        x = calc_min(ndf[col])
-        dict.update({'min' : x})
-        x = calc_percentile(ndf[col], 25)
-        dict.update({'25%' : x})
-        x = calc_percentile(ndf[col], 50)
-        dict.update({'50%' : x})
-        x = calc_percentile(ndf[col], 75)
-        dict.update({'75%' : x})
-        x = calc_max(ndf[col])
-        dict.update({'max' : x})
-        temp = pd.DataFrame(dict, index = [col])
-        res = pd.concat([res,temp])
-    print("========= PYTHON DESCRIPTION: ================")
-    print(res.transpose())
+    x = normalize_df(ndf.values)
+    print('x_norm:')
+    print(pd.DataFrame(x))
+    print(x.shape)
 
-    # =====================================================
-    # Generate dataframe with non-numeric columns
-    # =====================================================
-    print("============ BONUS: CATEGORICAL STATS ===================")
-    cdf = df.select_dtypes(exclude='number')
-    print("Categorial Columns:")
-    print(cdf.columns.to_list())
-    print("="*80)
-    dict= {}
-    for col in cdf[['Hogwarts House', 'Best Hand']]:
-        n, freq = calc_frequency_count(cdf[col])
-        freqdf = pd.DataFrame([freq])
-        print("Column: ", col)
-        print("n distinct: ", n)
-        print("Values Frequency:")
-        print(freqdf.transpose().to_string(header = False))
-        print("="*80)
+    # Treina modelo (gera thetas)
+    theta = train_ova(x, y, alpha=0.1, num_iterations=5000, p = True)
+    print('theta')
+    table = pd.DataFrame(theta).T
+    table.index = ndf.columns
+    table.columns = classes
+    print(table)
+    np.savetxt('theta.csv', theta)
+
+    # Predict ova
+    y_pred = predict(x,theta)
+    print('y_pred:')
+    print(pd.DataFrame(y_pred))
+    classes_real = df['Hogwarts House'] 
+    classes_pred = classes[y_pred]
+    print('classes_pred:')
+    print(pd.DataFrame(classes_pred))
+
+    # Performance (confusion matrix)
+    cm = confusion_matrix(classes_real, classes_pred)
+    cm = cm / classes_real.size * 100
+    print('Confusion Matrix:')
+    print(pd.DataFrame(cm))
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
+    disp.plot(cmap=plt.cm.Blues)
+    plt.title('Confusion Matrix for Logistic Regression Classifier')
+    plt.draw()
+
+    # Visualizacao 4 modelos
+    ax = table.plot(kind='bar', title ="Theta",figsize=(12,8),legend=True, fontsize=12)
+    plt.grid()
+    plt.tight_layout()
+    plt.draw()
+    plt.show()
 
 else:
-    print('Usage: describe.py [file]')
+    print('Usage: logreg_train.py [file]')
