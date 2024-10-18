@@ -3,4 +3,6 @@ aux
 .DS_Store
 datasets
 *.png
+*.csv
+
 
