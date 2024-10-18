@@ -61,70 +61,68 @@ def predict(x, all_theta):
 # =====================================================
 # MAIN
 # =====================================================
-# Ler df
-if len(sys.argv) > 1:
-    try:
-        # Read csv file in dataframe
-        df = pd.read_csv(sys.argv[1])
-    except:
-        print('File was not found or it is corrupted')
-        exit(1)
-    
-    print("========= TRAIN: ================")
-    df.drop(columns = ['Index'], inplace = True)
-    df.dropna(inplace = True)
-    print(df.describe())
-    print(df)
+if len(sys.argv) != 2:
+    print('Usage: describe.py [file]')
+    exit(1)
+try:
+    # Read csv file in dataframe
+    df = pd.read_csv(sys.argv[1])
+except:
+    print('File was not found or it is corrupted')
+    exit(1)
 
-    classes = np.unique(df['Hogwarts House'])
-    print('classes:')
-    print(classes)
-    # Pegar coluna classes
-    y = one_hot_encoding(df['Hogwarts House'])
-    print("y:")
-    print(pd.DataFrame(y))
+print("========= TRAIN: ================")
+df.drop(columns = ['Index'], inplace = True)
+df.dropna(inplace = True)
+print(df.describe())
+print(df)
 
-    # Montar x
-    ndf = df.select_dtypes(include='number')
-    x = normalize_df(ndf.values)
-    print('x_norm:')
-    print(pd.DataFrame(x))
-    print(x.shape)
+classes = np.unique(df['Hogwarts House'])
+print('classes:')
+print(classes)
+# Pegar coluna classes
+y = one_hot_encoding(df['Hogwarts House'])
+print("y:")
+print(pd.DataFrame(y))
 
-    # Treina modelo (gera thetas)
-    theta = train_ova(x, y, alpha=0.1, num_iterations=5000, p = True)
-    print('theta')
-    table = pd.DataFrame(theta).T
-    table.index = ndf.columns
-    table.columns = classes
-    print(table)
-    np.savetxt('theta.csv', theta)
+# Montar x
+ndf = df.select_dtypes(include='number')
+x = normalize_df(ndf.values)
+print('x_norm:')
+print(pd.DataFrame(x))
+print(x.shape)
 
-    # Predict ova
-    y_pred = predict(x,theta)
-    print('y_pred:')
-    print(pd.DataFrame(y_pred))
-    classes_real = df['Hogwarts House'] 
-    classes_pred = classes[y_pred]
-    print('classes_pred:')
-    print(pd.DataFrame(classes_pred))
+# Treina modelo (gera thetas)
+theta = train_ova(x, y, alpha=0.1, num_iterations=5000, p = True)
+print('theta')
+table = pd.DataFrame(theta).T
+table.index = ndf.columns
+table.columns = classes
+print(table)
+np.savetxt('theta.csv', theta)
 
-    # Performance (confusion matrix)
-    cm = confusion_matrix(classes_real, classes_pred)
-    cm = cm / classes_real.size * 100
-    print('Confusion Matrix:')
-    print(pd.DataFrame(cm))
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
-    disp.plot(cmap=plt.cm.Blues)
-    plt.title('Confusion Matrix for Logistic Regression Classifier')
-    plt.draw()
+# Predict ova
+y_pred = predict(x,theta)
+print('y_pred:')
+print(pd.DataFrame(y_pred))
+classes_real = df['Hogwarts House'] 
+classes_pred = classes[y_pred]
+print('classes_pred:')
+print(pd.DataFrame(classes_pred))
 
-    # Visualizacao 4 modelos
-    ax = table.plot(kind='bar', title ="Theta",figsize=(12,8),legend=True, fontsize=12)
-    plt.grid()
-    plt.tight_layout()
-    plt.draw()
-    plt.show()
+# Performance (confusion matrix)
+cm = confusion_matrix(classes_real, classes_pred)
+cm = cm / classes_real.size * 100
+print('Confusion Matrix:')
+print(pd.DataFrame(cm))
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
+disp.plot(cmap=plt.cm.Blues)
+plt.title('Confusion Matrix for Logistic Regression Classifier')
+plt.draw()
 
-else:
-    print('Usage: logreg_train.py [file]')
+# Visualizacao 4 modelos
+ax = table.plot(kind='bar', title ="Theta",figsize=(12,8),legend=True, fontsize=12)
+plt.grid()
+plt.tight_layout()
+plt.draw()
+plt.show()
