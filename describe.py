@@ -54,7 +54,6 @@ def calc_percentile(c, p):
     else:
         pos = ant + 1
     percentile = cc[ant] + frac * (cc[pos] - cc[ant])
-    #print ("n: ", n, " rank:", rank, "ant:", ant, " pos: ", pos, " frac:", frac, "cc_ant: ", cc[ant], "cc_pos", cc[pos], " p:", percentile)
     return percentile
     
 # Bonus function for categorical data. Returns a number and a dictionary
@@ -82,7 +81,6 @@ except:
     print('File was not found or it is corrupted')
     exit(1)
 
-#df.drop(columns = ['Index'], inplace = True)
 print("========= MY DESCRIPTION: ================")
 print(df.describe())
 

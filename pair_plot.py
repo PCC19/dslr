@@ -7,7 +7,6 @@ if len(sys.argv) != 2:
     print('Usage: describe.py [file]')
     exit(1)
 try:
-    # Read csv file in dataframe
     df = pd.read_csv(sys.argv[1])
 except:
     print('File was not found or it is corrupted')

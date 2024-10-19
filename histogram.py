@@ -7,7 +7,6 @@ if len(sys.argv) != 2:
     print('Usage: describe.py [file]')
     exit(1)
 try:
-    # Read csv file in dataframe
     df = pd.read_csv(sys.argv[1])
 except:
     print('File was not found or it is corrupted')
@@ -27,7 +26,7 @@ cols = ndf.columns
 # Set up the figure and axes for a grid of subplots
 # =====================================================
 fig, axes = plt.subplots(nrows=4, ncols=4, figsize=(16,12))
-axes = axes.flatten() # Flatten to easily iterate over
+axes = axes.flatten()
 
 # Histogram
 for ax, col in zip (axes , cols):

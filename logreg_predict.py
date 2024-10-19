@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import math
 import sys
 import os
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 def load_theta_from_file(file):
     if not os.path.exists(file):
@@ -42,7 +41,6 @@ if len(sys.argv) != 3:
     print('Usage: describe.py [file] [thetas]')
     exit(1)
 try:
-    # Read csv file in dataframe
     df = pd.read_csv(sys.argv[1])
 except:
     print('File was not found or it is corrupted')
@@ -54,7 +52,7 @@ df.drop(columns = ['Index', 'Hogwarts House'], inplace = True)
 print(df)
 print(df.describe())
 
-# Montar x
+# Generate x
 ndf = clear_nan(df.select_dtypes(include='number'))
 print('ndf')
 print(ndf)

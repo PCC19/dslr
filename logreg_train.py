@@ -46,7 +46,7 @@ def train_ova(x, y, alpha=0.01, num_iterations=2000, p = False):
     m, n = x.shape
     all_theta = np.zeros((y.shape[1], n))  # No bias term included
     for i in range(y.shape[1]):
-        initial_theta = np.zeros(n)  # Initialize theta for each class without bias 
+        initial_theta = np.zeros(n)
         all_theta[i], cost = gradient_descent(x, y[:, i], initial_theta, alpha, num_iterations)
         print("cost:", cost[-1])
         plt.plot(cost)
@@ -66,7 +66,6 @@ if len(sys.argv) != 2:
     print('Usage: describe.py [file]')
     exit(1)
 try:
-    # Read csv file in dataframe
     df = pd.read_csv(sys.argv[1])
 except:
     print('File was not found or it is corrupted')
@@ -81,19 +80,20 @@ print(df)
 classes = np.sort(np.unique(df['Hogwarts House']))
 print('classes:')
 print(classes)
-# Pegar coluna classes
+
+# Generate y
 y = one_hot_encoding(df['Hogwarts House'])
 print("y:")
 print(pd.DataFrame(y))
 
-# Montar x
+# Generate x
 ndf = df.select_dtypes(include='number')
 x = normalize_df(ndf.values)
 print('x_norm:')
 print(pd.DataFrame(x))
 print(x.shape)
 
-# Treina modelo (gera thetas)
+# Train model and generate theta file
 theta = train_ova(x, y, alpha=0.1, num_iterations=2000, p = True)
 print('theta')
 table = pd.DataFrame(theta).T
@@ -101,7 +101,6 @@ table.index = ndf.columns
 table.columns = classes
 print(table)
 table.to_csv('theta.csv')
-#np.savetxt('theta.csv', theta)
 
 # Predict ova
 print('x:', x.shape, 't:', theta.shape)
@@ -123,7 +122,7 @@ disp.plot(cmap=plt.cm.Blues)
 plt.title('Confusion Matrix for Logistic Regression Classifier')
 plt.draw()
 
-# Visualizacao 4 modelos
+# Visualize 4 models
 ax = table.plot(kind='bar', title ="Theta",figsize=(12,8),legend=True, fontsize=12)
 plt.grid()
 plt.tight_layout()

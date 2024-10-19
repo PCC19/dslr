@@ -7,13 +7,11 @@ if len(sys.argv) != 2:
     print('Usage: describe.py [file]')
     exit(1)
 try:
-    # Read csv file in dataframe
     df = pd.read_csv(sys.argv[1])
 except:
     print('File was not found or it is corrupted')
     exit(1)
 
-#df.drop(columns = ['Index'], inplace = True)
 print("========= SCATTER PLOT  ================")
 print(df.describe())
 
@@ -27,7 +25,7 @@ cols = ndf.columns
 # Set up the figure and axes for a grid of subplots
 # =====================================================
 fig, axes = plt.subplots(nrows=4, ncols=4, figsize=(16,12))
-axes = axes.flatten() # Flatten to easily iterate over
+axes = axes.flatten()
 
 # Scatter Plots
 for ax, col in zip (axes[1:] , cols[1:]):
@@ -38,6 +36,6 @@ for ax, col in zip (axes[1:] , cols[1:]):
     plt.setp(gfg.get_legend().get_title(), fontsize='6')
     gfg.set_ylabel(ylabel = '', fontsize = 6)
     gfg.set_xlabel(xlabel = '', fontsize = 6)
-plt.savefig('pair_plot.png', bbox_inches='tight')
+plt.savefig('scatter.png', bbox_inches='tight')
 plt.tight_layout()
 plt.show()
