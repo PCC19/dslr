@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import sys
+import os
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 def one_hot_encoding(c):
@@ -24,6 +25,7 @@ def normalize_df(d):
     return out
 
 def sigmoid(z):
+    print('z:',z, z.shape, type(z))
     return 1 / (1 + np.exp(-z.astype(float)))
 
 def compute_cost(x, y, theta):
@@ -56,14 +58,29 @@ def train_ova(x, y, alpha=0.01, num_iterations=2000, p = False):
 
 def predict(x, all_theta):
     print('x:', x.shape, type(x), 't:', all_theta.shape, type(all_theta))
+    print(x @ all_theta.T)
     probabilities = sigmoid(x @ all_theta.T)  
     return np.argmax(probabilities, axis=1) 
+
+def load_theta_from_file(file):
+    if not os.path.exists(file):
+        print("Theta file not found !")
+        exit(1)
+    thetas = pd.read_csv(file)
+    return thetas
+
+def clear_nan(d):
+    df = d.copy(deep = True)
+    for col in df.columns:
+        df[col].fillna(df[col].mean(), inplace = True)
+    return df
+
 
 # =====================================================
 # MAIN
 # =====================================================
-if len(sys.argv) != 2:
-    print('Usage: describe.py [file]')
+if len(sys.argv) != 3:
+    print('Usage: describe.py [file] [thetas]')
     exit(1)
 try:
     # Read csv file in dataframe
@@ -72,60 +89,36 @@ except:
     print('File was not found or it is corrupted')
     exit(1)
 
-print("========= TRAIN: ================")
-df.drop(columns = ['Index'], inplace = True)
-df.dropna(inplace = True)
-print(df.describe())
+print("========= PREDICT: ================")
+df.drop(columns = ['Index', 'Hogwarts House'], inplace = True)
+#df.dropna(inplace = True)
 print(df)
-
-classes = np.sort(np.unique(df['Hogwarts House']))
-print('classes:')
-print(classes)
-# Pegar coluna classes
-y = one_hot_encoding(df['Hogwarts House'])
-print("y:")
-print(pd.DataFrame(y))
+print(df.describe())
 
 # Montar x
-ndf = df.select_dtypes(include='number')
+ndf = clear_nan(df.select_dtypes(include='number'))
+print('ndf')
+print(ndf)
+print(ndf.describe())
 x = normalize_df(ndf.values)
 print('x_norm:')
 print(pd.DataFrame(x))
-print(x.shape)
+print(x.shape, type(x))
 
-# Treina modelo (gera thetas)
-theta = train_ova(x, y, alpha=0.1, num_iterations=2000, p = True)
-print('theta')
-table = pd.DataFrame(theta).T
-table.index = ndf.columns
-table.columns = classes
-print(table)
-table.to_csv('theta.csv')
-#np.savetxt('theta.csv', theta)
+# Load theta file
+arq = load_theta_from_file(sys.argv[2])
+print('arq:', arq)
+classes = arq.columns.to_numpy()[1:]
+print('clasees:')
+print(classes)
+theta = arq.values[:,1:].T
+print('Theta:')
+print(theta, theta.shape, type(theta))
 
 # Predict ova
 print('x:', x.shape, 't:', theta.shape)
 y_pred = predict(x,theta)
+classes_pred = classes[y_pred]
 print('y_pred:')
 print(pd.DataFrame(y_pred))
-classes_real = df['Hogwarts House'] 
-classes_pred = classes[y_pred]
-print('classes_pred:')
-print(pd.DataFrame(classes_pred))
-
-# Performance (confusion matrix)
-cm = confusion_matrix(classes_real, classes_pred)
-cm = cm / classes_real.size * 100
-print('Confusion Matrix:')
-print(pd.DataFrame(cm))
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
-disp.plot(cmap=plt.cm.Blues)
-plt.title('Confusion Matrix for Logistic Regression Classifier')
-plt.draw()
-
-# Visualizacao 4 modelos
-ax = table.plot(kind='bar', title ="Theta",figsize=(12,8),legend=True, fontsize=12)
-plt.grid()
-plt.tight_layout()
-plt.draw()
-plt.show()
+print(classes_pred)
