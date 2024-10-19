@@ -84,7 +84,7 @@ print(pd.DataFrame(y_pred))
 # Generate output
 output = pd.DataFrame(classes_pred)
 output.index.name = 'Index'
-output.columns = ['Hogwart House']
+output.columns = ['Hogwarts House']
 print('output:\n',output)
 output.to_csv('houses.csv')
 print("="*80)
