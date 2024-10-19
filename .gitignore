@@ -1,5 +1,4 @@
 aux
-*.tgz
 .DS_Store
 datasets
 *.png
