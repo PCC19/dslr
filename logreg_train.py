@@ -52,6 +52,7 @@ def train_ova(x, y, alpha=0.01, num_iterations=2000, p = False):
         plt.plot(cost)
         plt.grid()
     plt.draw()
+    plt.savefig('cost.png', bbox_inches='tight')
     return all_theta
 
 def predict(x, all_theta):
@@ -121,10 +122,12 @@ disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
 disp.plot(cmap=plt.cm.Blues)
 plt.title('Confusion Matrix for Logistic Regression Classifier')
 plt.draw()
+plt.savefig('cm.png', bbox_inches='tight')
 
 # Visualize 4 models
 ax = table.plot(kind='bar', title ="Theta",figsize=(12,8),legend=True, fontsize=12)
 plt.grid()
 plt.tight_layout()
 plt.draw()
+plt.savefig('models.png', bbox_inches='tight')
 plt.show()
